@@ -1,0 +1,31 @@
+version: 1
+send_anonymous_usage_stats: true
+project_id: "tap-exact"
+default_environment: test
+environments:
+  - name: test
+plugins:
+  extractors:
+    - name: "tap-exact"
+      namespace: "tap_exact"
+      pip_url: -e .
+      capabilities:
+        - state
+        - catalog
+        - discover
+        - about
+        - stream-maps
+      config:
+        start_date: "2023-10-01T00:00:00Z"
+        client_id: ""
+        client_secret: ""
+        tokens_s3_bucket: ""
+        tokens_s3_key: ""
+        divisions: ""
+      select:
+        - "*.*"
+
+  loaders:
+    - name: target-jsonl
+      variant: andyh1203
+      pip_url: target-jsonl
