@@ -16,14 +16,14 @@ plugins:
         - about
         - stream-maps
       config:
-        start_date: "2014-01-01T00:00:00Z"
-        client_id: $TAP_EXACT_CLIENT_ID_V2
-        client_secret: $TAP_EXACT_CLIENT_SECRET_V2
+        start_date: "2025-03-25T00:00:00Z"
+        client_id: $TAP_EXACT_CLIENT_ID
+        client_secret: $TAP_EXACT_CLIENT_SECRET
         tokens_s3_bucket: $TAP_EXACT_TOKENS_S3_BUCKET
         tokens_s3_key: $TAP_EXACT_TOKENS_S3_KEY
         divisions: ["3490573", "2542158", "2119843", "2140191", "2140277", "2603668"]
       select:
-        - gl_accounts.*
+        - *.*
 
   loaders:
     - name: target-jsonl
