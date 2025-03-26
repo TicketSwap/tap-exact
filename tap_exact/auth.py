@@ -2,17 +2,21 @@
 
 from __future__ import annotations
 
+import json
+from typing import TYPE_CHECKING
+
+import backoff
+import boto3
+import requests
 from singer_sdk.authenticators import OAuthAuthenticator, SingletonMeta
 from singer_sdk.helpers._util import utc_now
-from singer_sdk.streams import RESTStream
-import backoff
-import requests
-import json
-import boto3
+
+if TYPE_CHECKING:
+    from singer_sdk.streams import RESTStream
 
 
 class EmptyResponseError(Exception):
-    """Raised when the response is empty"""
+    """Raised when the response is empty."""
 
 
 # The SingletonMeta metaclass makes your streams reuse the same authenticator instance.
@@ -35,6 +39,7 @@ class ExactAuthenticator(OAuthAuthenticator, metaclass=SingletonMeta):
         self.access_token = tokens["access_token"]
 
     def download_tokens_from_s3(self) -> dict:
+        """Download tokens from S3."""
         return json.loads(
             self.s3.get_object(
                 Bucket=self._config["tokens_s3_bucket"], Key=self._config["tokens_s3_key"] + "/tokens.json"
@@ -44,6 +49,7 @@ class ExactAuthenticator(OAuthAuthenticator, metaclass=SingletonMeta):
         )
 
     def put_tokens_in_s3(self, tokens: dict) -> None:
+        """Put tokens in S3."""
         self.s3.put_object(
             Bucket=self._config["tokens_s3_bucket"],
             Key=self._config["tokens_s3_key"] + "/tokens.json",
@@ -66,6 +72,7 @@ class ExactAuthenticator(OAuthAuthenticator, metaclass=SingletonMeta):
 
     @backoff.on_exception(backoff.expo, EmptyResponseError, max_tries=5, factor=2)
     def update_access_token(self) -> None:
+        """Update the access token using the refresh token."""
         request_time = utc_now()
         auth_request_payload = self.oauth_request_payload
         token_response = requests.post(
@@ -77,9 +84,10 @@ class ExactAuthenticator(OAuthAuthenticator, metaclass=SingletonMeta):
 
         try:
             if token_response.json().get("error_description") == "Rate limit exceeded: access_token not expired":
-                return None
+                return
         except Exception as e:
-            raise EmptyResponseError(f"Failed converting response to a json, because response is empty")
+            msg = "Failed converting response to a json, because response is empty"
+            raise EmptyResponseError(msg) from e
 
         try:
             token_response.raise_for_status()

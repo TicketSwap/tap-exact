@@ -2,24 +2,25 @@
 
 from __future__ import annotations
 
+import json
 import sys
-from pathlib import Path
-from typing import Any, Callable, Iterable, Optional, Dict
 import typing
-from datetime import datetime
+from pathlib import Path
+from typing import Any, Callable, Iterable
 
 import requests
-from singer_sdk.helpers.jsonpath import extract_jsonpath
-from singer_sdk.pagination import BaseOffsetPaginator  # noqa: TCH002
-from singer_sdk.streams import RESTStream
-from lxml import etree
-import json
 import xmltodict
+from lxml import etree
 from pendulum import parse
+from singer_sdk.helpers.jsonpath import extract_jsonpath
+from singer_sdk.pagination import BaseOffsetPaginator
+from singer_sdk.streams import RESTStream
 
 from tap_exact.auth import ExactAuthenticator
 
 if typing.TYPE_CHECKING:
+    from datetime import datetime
+
     from requests import Response
 
 TPageToken = typing.TypeVar("TPageToken")
@@ -34,11 +35,12 @@ SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
 
 class ExactPaginator(BaseOffsetPaginator):
-    def __init__(self, stream, start_value, page_size) -> None:
+    """Exact pagination helper class."""
+    def __init__(self, stream:ExactStream, start_value:int, page_size:int) -> None:  # noqa: D107
         super().__init__(start_value=start_value, page_size=page_size)
         self.stream = stream
 
-    def has_more(self, response: Response) -> bool:  # noqa: ARG002
+    def has_more(self, response: Response) -> bool:
         """Override this method to check if the endpoint has any pages left.
 
         Args:
@@ -49,8 +51,9 @@ class ExactPaginator(BaseOffsetPaginator):
         """
         data = self.stream.xml_to_dict(response)
         link = data.get("feed", {}).get("link", [])
-        if type(link) == list:
+        if type(link) is list:
             return "next" in [item.get("@rel", "") for item in link]
+        return None
 
     def get_next(self, response: Response) -> TPageToken | None:
         """Get the next pagination token or index from the API response.
@@ -65,9 +68,9 @@ class ExactPaginator(BaseOffsetPaginator):
         data = self.stream.xml_to_dict(response)
         link = data.get("feed", {}).get("link", [])
         if "next" in [item.get("@rel", "") for item in link]:
-            next_link = [item["@href"] for item in link if item["@rel"] == "next"][0]
-            next_page_token = next_link.split("&")[-1].split("=")[-1]
-            return next_page_token
+            next_link = next(item["@href"] for item in link if item["@rel"] == "next")
+            return next_link.split("&")[-1].split("=")[-1]
+        return None
 
 
 class ExactStream(RESTStream):
@@ -75,14 +78,16 @@ class ExactStream(RESTStream):
 
     @property
     def partitions(self) -> list[dict] | None:
+        """Return a list of partitions, or None if the stream is not partitioned."""
         return [{"division": division} for division in self.config["divisions"]]
 
     @property
     def url_base(self) -> str:
         """Return the API URL root, configurable via tap settings."""
-        return f"https://start.exactonline.nl/api/v1"
+        return "https://start.exactonline.nl/api/v1"
 
     def get_url(self, context: dict | None) -> str:
+        """Return the URL for the API request."""
         return f"{self.url_base}/{context['division']}{self.path}"
 
     @cached_property
@@ -94,14 +99,16 @@ class ExactStream(RESTStream):
         """
         return ExactAuthenticator(self)
 
-    def get_starting_time(self, context):
+    def get_starting_time(self, context:dict) -> datetime:
+        """Return the starting timestamp for the stream."""
         start_date = self.config.get("start_date")
         if start_date:
             start_date = parse(self.config.get("start_date"))
         replication_key = self.get_starting_timestamp(context)
         return replication_key or start_date
 
-    def get_url_params(self, context: Optional[dict], next_page_token) -> Dict[str, Any]:
+    def get_url_params(self, context: dict | None, next_page_token:str) -> dict[str, Any]:
+        """Return a dictionary of parameters to use in the API request."""
         params: dict = {}
         if self.select:
             params["$select"] = self.select
@@ -117,15 +124,16 @@ class ExactStream(RESTStream):
         """Create a new pagination helper instance."""
         return ExactPaginator(self, start_value=None, page_size=60)
 
-    def xml_to_dict(self, response):
+    def xml_to_dict(self, response: requests.Response) -> dict:
+        """Convert xml response to dict."""
         try:
             # clean invalid xml characters
             my_parser = etree.XMLParser(recover=True)
-            xml = etree.fromstring(response.content, parser=my_parser)
+            xml = etree.fromstring(response.content, parser=my_parser)  # noqa: S320
             cleaned_xml_string = etree.tostring(xml)
             # parse xml to dict
             data = json.loads(json.dumps(xmltodict.parse(cleaned_xml_string)))
-        except:
+        except:  # noqa: E722
             data = json.loads(json.dumps(xmltodict.parse(response.content.decode("utf-8-sig").encode("utf-8"))))
         return data
 
@@ -159,7 +167,7 @@ class ExactStream(RESTStream):
         new_content = {}
         for key, value in content.items():
             new_key = key[2:]
-            if type(value) == str:
+            if type(value) is str:
                 new_content[new_key] = value
             elif not value or value.get("@m:null") == "true":
                 new_content[new_key] = None
@@ -176,11 +184,11 @@ class ExactStream(RESTStream):
                 new_content[new_key] = float(value.get("#text"))
             else:
                 new_content[new_key] = value.get("#text", None)
-        row = new_content
-        return row
+        return new_content
 
     @property
-    def select(self):
+    def select(self) -> str:
+        """Return the select query parameter."""
         return ",".join(self.schema["properties"].keys())
 
 
@@ -191,22 +199,21 @@ class ExactSyncStream(ExactStream):
         """Create a new pagination helper instance."""
         return ExactPaginator(self, start_value=None, page_size=1000)
 
-    def get_starting_time(self, context):
+    def get_starting_time(self, context:str) -> int:
+        """Return the starting timestamp for the stream."""
         state = self.get_context_state(context)
         rep_key = None
-        if "replication_key_value" in state.keys():
+        if "replication_key_value" in state:
             rep_key = state["replication_key_value"]
         return rep_key or 1
 
-    def get_url_params(self, context: Optional[dict], next_page_token) -> Dict[str, Any]:
+    def get_url_params(self, context: dict | None, next_page_token:int) -> dict[str, Any]:
+        """Return a dictionary of parameters to use in the API request."""
         params: dict = {}
         if self.select:
             params["$select"] = self.select
         start_timestamp = self.get_starting_time(context)
-        if start_timestamp == 1:
-            date_filter = f"Timestamp gt {start_timestamp}"
-        else:
-            date_filter = f"Timestamp gt {start_timestamp}L"
+        date_filter = f"Timestamp gt {start_timestamp}" if start_timestamp == 1 else f"Timestamp gt {start_timestamp}L"
         params["$filter"] = date_filter
         if next_page_token:
             params["$skiptoken"] = next_page_token
