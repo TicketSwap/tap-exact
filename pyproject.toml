@@ -21,7 +21,7 @@ requests = "~=2.32.3"
 cached-property = "~=2" # Remove after Python 3.7 support is dropped
 lxml = "^5.3.1"
 xmltodict = "^0.14.2"
-boto3 = "^1.37.19"
+boto3 = "^1.37.29"
 pendulum = "^3.0.0"
 
 [tool.poetry.group.dev.dependencies]
