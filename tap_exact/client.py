@@ -3,15 +3,11 @@
 from __future__ import annotations
 
 import json
-import re
 import sys
 import typing
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
-from singer_sdk.typing import PropertiesList, Property, StringType, IntegerType, BooleanType, DateTimeType, NumberType
-
-from bs4 import BeautifulSoup
 import requests
 import xmltodict
 from lxml import etree
@@ -58,7 +54,7 @@ class ExactPaginator(BaseOffsetPaginator):
         link = data.get("feed", {}).get("link", [])
         if type(link) is list:
             return "next" in [item.get("@rel", "") for item in link]
-        return False
+        return None
 
     def get_next(self, response: Response) -> TPageToken | None:
         """Get the next pagination token or index from the API response.
@@ -81,61 +77,6 @@ class ExactPaginator(BaseOffsetPaginator):
 class ExactStream(RESTStream):
     """Exact stream class."""
 
-    def _to_snake_case(self, text: str) -> str:
-        text = text.strip()
-        text = re.sub(r"[^0-9a-zA-Z]+", "_", text)  # replace non-alphanum with _
-        text = re.sub(r"_{2,}", "_", text)  # collapse multiple _
-        return text.lower().strip("_")
-
-    @property
-    def schema_url(self) -> str:
-        """Return the base URL for the schema for this stream."""
-        return f"https://start.exactonline.nl/docs/HlpRestAPIResourcesDetails.aspx?name={self.schema_path}"
-
-    @property
-    def schema_path(self) -> str:
-        """Return the url path to the schema for this stream, should be overridden by subclasses."""
-        raise NotImplementedError
-
-    def to_singer_type(self, exact_type: str):
-        exact_type = exact_type.lower()
-        if "guid" in exact_type or "string" in exact_type or "memo" in exact_type:
-            return StringType
-        elif "int" in exact_type or "long" in exact_type or "byte" in exact_type:
-            return IntegerType
-        elif "decimal" in exact_type or "double" in exact_type or "float" in exact_type:
-            return NumberType
-        elif "bool" in exact_type:
-            return BooleanType
-        elif "date" in exact_type or "time" in exact_type:
-            return DateTimeType
-        else:
-            return StringType  # default to string if unknown
-
-    @cached_property
-    def schema(self) -> dict:
-        resp = requests.get(self.schema_url, timeout=30)
-        resp.raise_for_status()
-        soup = BeautifulSoup(resp.text, "html.parser")
-        table = soup.find("table", id="referencetable")
-        if not table:
-            msg = f"Could not find schema table at {self.schema_url}"
-            raise ValueError(msg)
-
-        properties = [p.find("input").attrs for p in table.find_all("tr") if p.find("input")]
-
-        schema = PropertiesList(
-            *[
-                Property(
-                    prop["name"],
-                    self.to_singer_type(prop["data-type"]),
-                )
-                for prop in properties
-            ]
-        ).to_dict()
-        self.logger.info(schema)
-        return schema
-
     @property
     def partitions(self) -> list[dict] | None:
         """Return a list of partitions, or None if the stream is not partitioned."""
@@ -146,7 +87,7 @@ class ExactStream(RESTStream):
         """Return the API URL root, configurable via tap settings."""
         return "https://start.exactonline.nl/api/v1"
 
-    def get_url(self, context: dict) -> str:
+    def get_url(self, context: dict | None) -> str:
         """Return the URL for the API request."""
         return f"{self.url_base}/{context['division']}{self.path}"
 
@@ -207,7 +148,6 @@ class ExactStream(RESTStream):
             Each record from the source.
         """
         data = self.xml_to_dict(response).get("feed", {}).get("entry", [])
-        self.logger.info(data)
         yield from extract_jsonpath(self.records_jsonpath, input=data)
 
     def post_process(

@@ -22,8 +22,6 @@ plugins:
         tokens_s3_bucket: $TAP_EXACT_TOKENS_S3_BUCKET
         tokens_s3_key: $TAP_EXACT_TOKENS_S3_KEY
         divisions: ["3490573"] 
-      select:
-        - gl_account_classification_mappings
 
   loaders:
     - name: target-jsonl
