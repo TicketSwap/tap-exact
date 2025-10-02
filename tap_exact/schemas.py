@@ -170,7 +170,7 @@ gl_account_classification_mappings_schema = PropertiesList(
 
 assets_schema = PropertiesList(
     Property("ID", StringType),  # Primary key
-    Property("AlreadyDepreciated", IntegerType),  # Asset already depreciated before registering
+    Property("AlreadyDepreciated", StringType),  # Asset already depreciated before registering
     Property("AssetFrom", StringType),  # Original asset ID in case of transfer/split
     Property("AssetFromDescription", StringType),  # Description of AssetFrom
     Property("AssetGroup", StringType),  # Asset group for GLAccount transactions

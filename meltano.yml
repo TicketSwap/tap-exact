@@ -24,8 +24,6 @@ plugins:
         divisions: ["3490573"] 
       select:
         - "*.*"
-        - "!assets.*"
-
 
   loaders:
     - name: target-jsonl
