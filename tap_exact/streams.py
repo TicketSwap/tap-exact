@@ -60,4 +60,3 @@ class AssetsStream(ExactStream):
     path = "/assets/Assets"
     primary_keys: t.ClassVar[list[str]] = ["ID", "Division"]
     schema = assets_schema  # pyright: ignore[reportAssignmentType]
-
