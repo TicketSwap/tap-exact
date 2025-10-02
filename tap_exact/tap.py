@@ -3,7 +3,13 @@
 from __future__ import annotations
 
 from singer_sdk import Tap
-from singer_sdk.typing import ArrayType, DateTimeType, PropertiesList, Property, StringType
+from singer_sdk.typing import (
+    ArrayType,
+    DateTimeType,
+    PropertiesList,
+    Property,
+    StringType,
+)
 
 from tap_exact import streams
 

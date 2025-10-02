@@ -36,7 +36,8 @@ SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
 class ExactPaginator(BaseOffsetPaginator):
     """Exact pagination helper class."""
-    def __init__(self, stream:ExactStream, start_value:int, page_size:int) -> None:  # noqa: D107
+
+    def __init__(self, stream: ExactStream, start_value: int, page_size: int) -> None:  # noqa: D107
         super().__init__(start_value=start_value, page_size=page_size)
         self.stream = stream
 
@@ -99,7 +100,7 @@ class ExactStream(RESTStream):
         """
         return ExactAuthenticator(self)
 
-    def get_starting_time(self, context:dict) -> datetime:
+    def get_starting_time(self, context: dict) -> datetime:
         """Return the starting timestamp for the stream."""
         start_date = self.config.get("start_date")
         if start_date:
@@ -107,7 +108,7 @@ class ExactStream(RESTStream):
         replication_key = self.get_starting_timestamp(context)
         return replication_key or start_date
 
-    def get_url_params(self, context: dict | None, next_page_token:str) -> dict[str, Any]:
+    def get_url_params(self, context: dict | None, next_page_token: str) -> dict[str, Any]:
         """Return a dictionary of parameters to use in the API request."""
         params: dict = {}
         if self.select:
@@ -199,7 +200,7 @@ class ExactSyncStream(ExactStream):
         """Create a new pagination helper instance."""
         return ExactPaginator(self, start_value=None, page_size=1000)
 
-    def get_starting_time(self, context:str) -> int:
+    def get_starting_time(self, context: str) -> int:
         """Return the starting timestamp for the stream."""
         state = self.get_context_state(context)
         rep_key = None
@@ -207,7 +208,7 @@ class ExactSyncStream(ExactStream):
             rep_key = state["replication_key_value"]
         return rep_key or 1
 
-    def get_url_params(self, context: dict | None, next_page_token:int) -> dict[str, Any]:
+    def get_url_params(self, context: dict | None, next_page_token: int) -> dict[str, Any]:
         """Return a dictionary of parameters to use in the API request."""
         params: dict = {}
         if self.select:

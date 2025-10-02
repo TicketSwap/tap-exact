@@ -3,9 +3,16 @@
 from __future__ import annotations
 
 import typing as t
-from pathlib import Path
 
-from singer_sdk.typing import StringType, IntegerType, BooleanType, DateTimeType, PropertiesList, Property, NumberType
+from singer_sdk.typing import (
+    BooleanType,
+    DateTimeType,
+    IntegerType,
+    NumberType,
+    PropertiesList,
+    Property,
+    StringType,
+)
 
 from tap_exact.client import ExactStream, ExactSyncStream
 

@@ -46,6 +46,7 @@ warn_unused_configs = true
 [tool.ruff]
 src = ["tap_exact"]
 target-version = "py37"
+line-length = 120
 
 [tool.ruff.lint]
 ignore = [
