@@ -21,9 +21,7 @@ plugins:
         client_secret: $TAP_EXACT_CLIENT_SECRET
         tokens_s3_bucket: $TAP_EXACT_TOKENS_S3_BUCKET
         tokens_s3_key: $TAP_EXACT_TOKENS_S3_KEY
-        divisions: ["3490573", "2542158", "2119843", "2140191", "2140277", "2603668"]
-      select:
-        - *.*
+        divisions: ["3490573"] 
 
   loaders:
     - name: target-jsonl

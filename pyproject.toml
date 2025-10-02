@@ -1,35 +1,43 @@
-[tool.poetry]
+[project]
 name = "ticketswap-tap-exact"
 version = "0.0.1"
 description = "`tap-exact` is a Singer tap for Exact, built with the Meltano Singer SDK."
+authors = [{ name = "Tobias Cadee", email = "tobias.cadee@ticketswap.com" }]
 readme = "README.md"
-authors = ["Tobias Cadee <tobias.cadee@ticketswap.com>"]
+license = "Apache-2.0"
+requires-python = ">=3.10"
 keywords = [
     "ELT",
     "Exact",
 ]
-license = "Apache-2.0"
-packages = [
-    { include = "tap_exact" },
+dependencies = [
+    "boto3>=1.40.43",
+    "fs-s3fs>=1.1.1",
+    "lxml>=6.0.2",
+    "pendulum>=3.1.0",
+    "requests>=2.32.5",
+    "singer-sdk>=0.42.1",
+    "xmltodict>=1.0.2",
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.8,<4"
-singer-sdk = { version="~=0.42.1" }
-fs-s3fs = { version = "~=1.1.1", optional = true }
-requests = "~=2.32.3"
-cached-property = "~=2" # Remove after Python 3.7 support is dropped
-lxml = "^5.3.1"
-xmltodict = "^0.14.2"
-boto3 = "^1.37.19"
-pendulum = "^3.0.0"
+[project.scripts]
+tap-exact = "tap_exact.tap:TapExact.cli"
 
-[tool.poetry.group.dev.dependencies]
-pytest = ">=7.4.0"
-singer-sdk = { version="~=0.42.1", extras = ["testing"] }
+[dependency-groups]
+dev = [
+    "pytest>=7.4.0",
+    "singer-sdk[testing]~=0.42.1",
+]
 
-[tool.poetry.extras]
-s3 = ["fs-s3fs"]
+[tool.hatch.build.targets.sdist]
+include = ["tap_exact"]
+
+[tool.hatch.build.targets.wheel]
+include = ["tap_exact"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.mypy]
 python_version = "3.9"
@@ -38,6 +46,7 @@ warn_unused_configs = true
 [tool.ruff]
 src = ["tap_exact"]
 target-version = "py37"
+line-length = 120
 
 [tool.ruff.lint]
 ignore = [
@@ -56,11 +65,3 @@ known-first-party = ["tap_exact"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
-
-[build-system]
-requires = ["poetry-core>=1.0.8"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-# CLI declaration
-tap-exact = 'tap_exact.tap:TapExact.cli'

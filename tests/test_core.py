@@ -1,7 +1,7 @@
 """Tests standard tap features using the built-in SDK tests library."""
 
-from datetime import datetime, timedelta
 import os
+from datetime import datetime, timedelta
 
 from singer_sdk.testing import get_tap_test_class
 
@@ -22,6 +22,3 @@ TestTapExact = get_tap_test_class(
     tap_class=TapExact,
     config=SAMPLE_CONFIG,
 )
-
-
-# TODO: Create additional tests as appropriate for your tap.
