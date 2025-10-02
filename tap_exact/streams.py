@@ -6,11 +6,11 @@ import typing as t
 
 from tap_exact.client import ExactStream, ExactSyncStream
 from tap_exact.schemas import (
+    assets_schema,
     gl_account_classification_mappings_schema,
     gl_accounts_schema,
     gl_classifications_schema,
     transaction_lines_schema,
-    assets_schema,
 )
 
 
@@ -59,5 +59,4 @@ class AssetsStream(ExactStream):
     name = "assets"
     path = "/assets/Assets"
     primary_keys: t.ClassVar[list[str]] = ["ID", "Division"]
-    schema = assets_schema  # pyright: ignore[reportAssignmentType
-
+    schema = assets_schema  # pyright: ignore[reportAssignmentType]
