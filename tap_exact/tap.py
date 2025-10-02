@@ -39,6 +39,7 @@ class TapExact(Tap):
             streams.GLClassificationsStream(self),
             streams.GLAccountClassificationMappingsStream(self),
             streams.TransactionLinesStream(self),
+            streams.AssetsStream(self),
         ]
 
 
