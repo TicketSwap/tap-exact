@@ -130,7 +130,7 @@ class ExactStream(RESTStream):
         try:
             # clean invalid xml characters
             my_parser = etree.XMLParser(recover=True)
-            xml = etree.fromstring(response.content, parser=my_parser)  # noqa: S320
+            xml = etree.fromstring(response.content, parser=my_parser)
             cleaned_xml_string = etree.tostring(xml)
             # parse xml to dict
             data = json.loads(json.dumps(xmltodict.parse(cleaned_xml_string)))
