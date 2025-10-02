@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import re
 import sys
 import typing
 from pathlib import Path
@@ -55,7 +54,7 @@ class ExactPaginator(BaseOffsetPaginator):
         link = data.get("feed", {}).get("link", [])
         if type(link) is list:
             return "next" in [item.get("@rel", "") for item in link]
-        return False
+        return None
 
     def get_next(self, response: Response) -> TPageToken | None:
         """Get the next pagination token or index from the API response.
@@ -88,7 +87,7 @@ class ExactStream(RESTStream):
         """Return the API URL root, configurable via tap settings."""
         return "https://start.exactonline.nl/api/v1"
 
-    def get_url(self, context: dict) -> str:
+    def get_url(self, context: dict | None) -> str:
         """Return the URL for the API request."""
         return f"{self.url_base}/{context['division']}{self.path}"
 
@@ -149,7 +148,6 @@ class ExactStream(RESTStream):
             Each record from the source.
         """
         data = self.xml_to_dict(response).get("feed", {}).get("entry", [])
-        self.logger.info(data)
         yield from extract_jsonpath(self.records_jsonpath, input=data)
 
     def post_process(
