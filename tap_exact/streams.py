@@ -191,16 +191,8 @@ class GLAccountClassificationMappingsStream(ExactStream):
     name = "gl_account_classification_mappings"
     path = "/Financial/GLAccountClassificationMappings"
     primary_keys: t.ClassVar[list[str]] = ["ID", "Division"]
-    schema = PropertiesList(
-        Property("ID", StringType),
-        Property("Classification", StringType),
-        Property("ClassificationCode", StringType),
-        Property("ClassificationDescription", StringType),
-        Property("Division", IntegerType),
-        Property("GLAccount", StringType),
-        Property("GLAccountCode", StringType),
-        Property("GLAccountDescription", StringType),
-        Property("GLSchemeCode", StringType),
-        Property("GLSchemeDescription", StringType),
-        Property("GLSchemeID", StringType),
-    ).to_dict()
+
+    @property
+    def schema_path(self) -> str:
+        """Return the url path to the schema for this stream."""
+        return "FinancialGLAccountClassificationMappings"
