@@ -12,6 +12,7 @@ keywords = [
 ]
 dependencies = [
     "boto3>=1.40.43",
+    "bs4>=0.0.2",
     "fs-s3fs>=1.1.1",
     "lxml>=6.0.2",
     "pendulum>=3.1.0",
