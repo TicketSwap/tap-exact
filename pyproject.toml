@@ -26,7 +26,7 @@ tap-exact = "tap_exact.tap:TapExact.cli"
 [dependency-groups]
 dev = [
     "pytest>=7.4.0",
-    "singer-sdk[testing]~=0.42.1",
+    "singer-sdk[testing]~=0.52.3",
 ]
 
 [tool.hatch.build.targets.sdist]
