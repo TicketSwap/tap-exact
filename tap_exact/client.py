@@ -104,9 +104,9 @@ class ExactStream(RESTStream):
         params: dict = {}
         if self.select:
             params["$select"] = self.select
-        start_date = self.get_starting_timestamp(context).strftime("%Y-%m-%dT%H:%M:%S")
+        start_date = self.get_starting_timestamp(context)
         if start_date:
-            date_filter = f"Modified gt datetime'{start_date}'"
+            date_filter = f"Modified gt datetime'{start_date.strftime("%Y-%m-%dT%H:%M:%S")}'"
             params["$filter"] = date_filter
         if next_page_token:
             params["$skiptoken"] = next_page_token
