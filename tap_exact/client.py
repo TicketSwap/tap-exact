@@ -11,7 +11,6 @@ from typing import Any, Callable, Iterable
 import requests
 import xmltodict
 from lxml import etree
-from pendulum import parse
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import BaseOffsetPaginator
 from singer_sdk.streams import RESTStream
@@ -105,8 +104,8 @@ class ExactStream(RESTStream):
         params: dict = {}
         if self.select:
             params["$select"] = self.select
-        if self.replication_key:
-            start_date = self.get_starting_timestamp(context).strftime("%Y-%m-%dT%H:%M:%S")
+        start_date = self.get_starting_timestamp(context).strftime("%Y-%m-%dT%H:%M:%S")
+        if start_date:
             date_filter = f"Modified gt datetime'{start_date}'"
             params["$filter"] = date_filter
         if next_page_token:
