@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import typing as t
 
-from tap_exact.client import ExactStream, ExactSyncStream
+from tap_exact.client import ExactStream
 from tap_exact.schemas import (
     assets_schema,
     gl_account_classification_mappings_schema,
