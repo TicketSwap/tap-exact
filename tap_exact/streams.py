@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import typing as t
 
-from tap_exact.client import ExactStream, ExactSyncStream
+from tap_exact.client import ExactStream
 from tap_exact.schemas import (
     assets_schema,
     gl_account_classification_mappings_schema,
@@ -14,33 +14,32 @@ from tap_exact.schemas import (
 )
 
 
-class TransactionLinesStream(ExactSyncStream):
+class TransactionLinesStream(ExactStream):
     """Define TransactionLines stream."""
 
     name = "transaction_lines"
-    path = "/sync/Financial/TransactionLines"
+    path = "/bulk/Financial/TransactionLines"
     primary_keys: t.ClassVar[list[str]] = ["ID", "Division"]
-    replication_key: t.ClassVar[str] = "Timestamp"
+    replication_key: t.ClassVar[str] = "Modified"
     schema = transaction_lines_schema  # pyright: ignore[reportAssignmentType]
 
 
-class GLAccountsStream(ExactSyncStream):
+class GLAccountsStream(ExactStream):
     """Define GLAccounts stream."""
 
     name = "gl_accounts"
-    path = "/sync/Financial/GLAccounts"
+    path = "/bulk/Financial/GLAccounts"
     primary_keys: t.ClassVar[list[str]] = ["ID", "Division"]
-    replication_key: t.ClassVar[str] = "Timestamp"
+    replication_key: t.ClassVar[str] = "Modified"
     schema = gl_accounts_schema  # pyright: ignore[reportAssignmentType]
 
 
-class GLClassificationsStream(ExactSyncStream):
+class GLClassificationsStream(ExactStream):
     """Define GLClassifications stream."""
 
     name = "gl_classifications"
     path = "/sync/Financial/GLClassifications"
     primary_keys: t.ClassVar[list[str]] = ["ID", "Division"]
-    replication_key: t.ClassVar[str] = "Timestamp"
     schema = gl_classifications_schema  # pyright: ignore[reportAssignmentType]
 
 

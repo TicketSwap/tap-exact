@@ -11,7 +11,6 @@ from singer_sdk.typing import (
 )
 
 transaction_lines_schema = PropertiesList(
-    Property("Timestamp", IntegerType),
     Property("Account", StringType),
     Property("AccountCode", StringType),
     Property("AccountName", StringType),
@@ -85,7 +84,6 @@ transaction_lines_schema = PropertiesList(
 ).to_dict()
 
 gl_accounts_schema = PropertiesList(
-    Property("Timestamp", IntegerType),
     Property("AllowCostsInSales", BooleanType),
     Property("AssimilatedVATBox", IntegerType),
     Property("BalanceSide", StringType),
@@ -131,7 +129,6 @@ gl_accounts_schema = PropertiesList(
 ).to_dict()
 
 gl_classifications_schema = PropertiesList(
-    Property("Timestamp", IntegerType),
     Property("Abstract", BooleanType),
     Property("Balance", StringType),
     Property("Code", StringType),

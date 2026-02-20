@@ -11,7 +11,6 @@ from typing import Any, Callable, Iterable
 import requests
 import xmltodict
 from lxml import etree
-from pendulum import parse
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.pagination import BaseOffsetPaginator
 from singer_sdk.streams import RESTStream
@@ -19,8 +18,6 @@ from singer_sdk.streams import RESTStream
 from tap_exact.auth import ExactAuthenticator
 
 if typing.TYPE_CHECKING:
-    from datetime import datetime
-
     from requests import Response
 
 TPageToken = typing.TypeVar("TPageToken")
@@ -100,22 +97,14 @@ class ExactStream(RESTStream):
         """
         return ExactAuthenticator(self)
 
-    def get_starting_time(self, context: dict) -> datetime:
-        """Return the starting timestamp for the stream."""
-        start_date = self.config.get("start_date")
-        if start_date:
-            start_date = parse(self.config.get("start_date"))
-        replication_key = self.get_starting_timestamp(context)
-        return replication_key or start_date
-
     def get_url_params(self, context: dict | None, next_page_token: str) -> dict[str, Any]:
         """Return a dictionary of parameters to use in the API request."""
         params: dict = {}
         if self.select:
             params["$select"] = self.select
-        start_date = self.get_starting_time(context).strftime("%Y-%m-%dT%H:%M:%S")
-        if self.replication_key:
-            date_filter = f"Modified gt datetime'{start_date}'"
+        start_date = self.get_starting_timestamp(context)
+        if start_date is not None:
+            date_filter = f"Modified gt datetime'{start_date.strftime('%Y-%m-%dT%H:%M:%S')}'"
             params["$filter"] = date_filter
         if next_page_token:
             params["$skiptoken"] = next_page_token
@@ -191,31 +180,3 @@ class ExactStream(RESTStream):
     def select(self) -> str:
         """Return the select query parameter."""
         return ",".join(self.schema["properties"].keys())
-
-
-class ExactSyncStream(ExactStream):
-    """Exact sync stream class."""
-
-    def get_new_paginator(self) -> BaseOffsetPaginator:
-        """Create a new pagination helper instance."""
-        return ExactPaginator(self, start_value=None, page_size=1000)
-
-    def get_starting_time(self, context: str) -> int:
-        """Return the starting timestamp for the stream."""
-        state = self.get_context_state(context)
-        rep_key = None
-        if "replication_key_value" in state:
-            rep_key = state["replication_key_value"]
-        return rep_key or 1
-
-    def get_url_params(self, context: dict | None, next_page_token: int) -> dict[str, Any]:
-        """Return a dictionary of parameters to use in the API request."""
-        params: dict = {}
-        if self.select:
-            params["$select"] = self.select
-        start_timestamp = self.get_starting_time(context)
-        date_filter = f"Timestamp gt {start_timestamp}" if start_timestamp == 1 else f"Timestamp gt {start_timestamp}L"
-        params["$filter"] = date_filter
-        if next_page_token:
-            params["$skiptoken"] = next_page_token
-        return params
