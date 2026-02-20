@@ -18,7 +18,6 @@ from singer_sdk.streams import RESTStream
 from tap_exact.auth import ExactAuthenticator
 
 if typing.TYPE_CHECKING:
-    from datetime import datetime
 
     from requests import Response
 
@@ -105,7 +104,7 @@ class ExactStream(RESTStream):
         if self.select:
             params["$select"] = self.select
         start_date = self.get_starting_timestamp(context)
-        if start_date != None:
+        if start_date is not None:
             date_filter = f"Modified gt datetime'{start_date.strftime('%Y-%m-%dT%H:%M:%S')}'"
             params["$filter"] = date_filter
         if next_page_token:
