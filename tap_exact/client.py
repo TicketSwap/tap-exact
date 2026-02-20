@@ -18,7 +18,6 @@ from singer_sdk.streams import RESTStream
 from tap_exact.auth import ExactAuthenticator
 
 if typing.TYPE_CHECKING:
-
     from requests import Response
 
 TPageToken = typing.TypeVar("TPageToken")
