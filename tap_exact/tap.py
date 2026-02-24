@@ -40,6 +40,7 @@ class TapExact(Tap):
             streams.GLAccountClassificationMappingsStream(self),
             streams.TransactionLinesStream(self),
             streams.AssetsStream(self),
+            streams.DeletedStream(self),
         ]
 
 
