@@ -16,14 +16,14 @@ plugins:
         - about
         - stream-maps
       config:
-        start_date: "2026-01-01T00:00:00Z"
+        start_date: "2025-03-25T00:00:00Z"
         client_id: $TAP_EXACT_CLIENT_ID
         client_secret: $TAP_EXACT_CLIENT_SECRET
         tokens_s3_bucket: $TAP_EXACT_TOKENS_S3_BUCKET
         tokens_s3_key: $TAP_EXACT_TOKENS_S3_KEY
-        divisions: ["2119843"]
+        divisions: ["3490573"] 
       select:
-        - "deleted.*"
+        - "*.*"
 
   loaders:
     - name: target-jsonl
