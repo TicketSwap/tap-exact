@@ -223,3 +223,13 @@ assets_schema = PropertiesList(
     Property("TransactionEntryNo", IntegerType),  # Entry number of transaction
     Property("Type", StringType),  # Asset type (0=Other Assets, 1=Commercial Building)
 ).to_dict()
+
+deleted_schema = PropertiesList(
+    Property("ID", StringType),  # Primary key
+    Property("Timestamp", IntegerType),  # Deletion timestamp
+    Property("Division", IntegerType),  # Division code
+    Property("DeletedBy", StringType),  # User ID of the person who deleted the record
+    Property("DeletedDate", DateTimeType),  # Date when the record was deleted
+    Property("EntityKey", StringType),  # The primary key of the deleted record
+    Property("EntityType", IntegerType),  # The type of the deleted record
+).to_dict()

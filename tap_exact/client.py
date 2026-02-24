@@ -180,3 +180,26 @@ class ExactStream(RESTStream):
     def select(self) -> str:
         """Return the select query parameter."""
         return ",".join(self.schema["properties"].keys())
+
+
+class ExactBulkStream(ExactStream):
+    """Exact bulk stream class."""
+
+    def get_new_paginator(self) -> BaseOffsetPaginator:
+        """Create a new pagination helper instance."""
+        return ExactPaginator(self, start_value=None, page_size=1000)
+
+
+class ExactSyncStream(ExactBulkStream):
+    """Exact stream class for sync endpoints."""
+
+    def get_url_params(self, context: dict | None, next_page_token: str) -> dict[str, Any]:
+        """Return a dictionary of parameters to use in the API request."""
+        params: dict = {}
+        if self.select:
+            params["$select"] = self.select
+        starting_timestamp = self.get_starting_replication_key_value(context)
+        params["$filter"] = f"Timestamp gt {starting_timestamp if type(starting_timestamp) is int else 1}"
+        if next_page_token:
+            params["$skiptoken"] = next_page_token
+        return params

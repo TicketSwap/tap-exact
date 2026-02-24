@@ -4,43 +4,37 @@ from __future__ import annotations
 
 import typing as t
 
-from tap_exact.client import ExactStream
-from tap_exact.schemas import (
-    assets_schema,
-    gl_account_classification_mappings_schema,
-    gl_accounts_schema,
-    gl_classifications_schema,
-    transaction_lines_schema,
-)
+from tap_exact import schemas
+from tap_exact.client import ExactBulkStream, ExactStream, ExactSyncStream
 
 
-class TransactionLinesStream(ExactStream):
+class TransactionLinesStream(ExactBulkStream):
     """Define TransactionLines stream."""
 
     name = "transaction_lines"
     path = "/bulk/Financial/TransactionLines"
     primary_keys: t.ClassVar[list[str]] = ["ID", "Division"]
     replication_key: t.ClassVar[str] = "Modified"
-    schema = transaction_lines_schema  # pyright: ignore[reportAssignmentType]
+    schema = schemas.transaction_lines_schema  # pyright: ignore[reportAssignmentType]
 
 
-class GLAccountsStream(ExactStream):
+class GLAccountsStream(ExactBulkStream):
     """Define GLAccounts stream."""
 
     name = "gl_accounts"
     path = "/bulk/Financial/GLAccounts"
     primary_keys: t.ClassVar[list[str]] = ["ID", "Division"]
     replication_key: t.ClassVar[str] = "Modified"
-    schema = gl_accounts_schema  # pyright: ignore[reportAssignmentType]
+    schema = schemas.gl_accounts_schema  # pyright: ignore[reportAssignmentType]
 
 
-class GLClassificationsStream(ExactStream):
+class GLClassificationsStream(ExactSyncStream):
     """Define GLClassifications stream."""
 
     name = "gl_classifications"
     path = "/sync/Financial/GLClassifications"
     primary_keys: t.ClassVar[list[str]] = ["ID", "Division"]
-    schema = gl_classifications_schema  # pyright: ignore[reportAssignmentType]
+    schema = schemas.gl_classifications_schema  # pyright: ignore[reportAssignmentType]
 
 
 class GLAccountClassificationMappingsStream(ExactStream):
@@ -49,7 +43,7 @@ class GLAccountClassificationMappingsStream(ExactStream):
     name = "gl_account_classification_mappings"
     path = "/Financial/GLAccountClassificationMappings"
     primary_keys: t.ClassVar[list[str]] = ["ID", "Division"]
-    schema = gl_account_classification_mappings_schema  # pyright: ignore[reportAssignmentType]
+    schema = schemas.gl_account_classification_mappings_schema  # pyright: ignore[reportAssignmentType]
 
 
 class AssetsStream(ExactStream):
@@ -58,4 +52,14 @@ class AssetsStream(ExactStream):
     name = "assets"
     path = "/assets/Assets"
     primary_keys: t.ClassVar[list[str]] = ["ID", "Division"]
-    schema = assets_schema  # pyright: ignore[reportAssignmentType]
+    schema = schemas.assets_schema  # pyright: ignore[reportAssignmentType]
+
+
+class DeletedStream(ExactSyncStream):
+    """Define Deleted stream."""
+
+    name = "deleted"
+    path = "/sync/Deleted"
+    primary_keys: t.ClassVar[list[str]] = ["ID", "Division"]
+    replication_key: t.ClassVar[str] = "Timestamp"
+    schema = schemas.deleted_schema  # pyright: ignore[reportAssignmentType]
