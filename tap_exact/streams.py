@@ -28,11 +28,11 @@ class GLAccountsStream(ExactBulkStream):
     schema = schemas.gl_accounts_schema  # pyright: ignore[reportAssignmentType]
 
 
-class GLClassificationsStream(ExactSyncStream):
+class GLClassificationsStream(ExactBulkStream):
     """Define GLClassifications stream."""
 
     name = "gl_classifications"
-    path = "/sync/Financial/GLClassifications"
+    path = "/bulk/Financial/GLClassifications"
     primary_keys: t.ClassVar[list[str]] = ["ID", "Division"]
     schema = schemas.gl_classifications_schema  # pyright: ignore[reportAssignmentType]
 
