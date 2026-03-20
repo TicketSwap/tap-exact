@@ -199,7 +199,7 @@ class ExactSyncStream(ExactBulkStream):
         if self.select:
             params["$select"] = self.select
         starting_timestamp = self.get_starting_replication_key_value(context)
-        params["$filter"] = f"Timestamp gt {starting_timestamp if type(starting_timestamp) is int else 1}"
+        params["$filter"] = f"Timestamp gt {starting_timestamp if type(starting_timestamp) is int else 1}L"
         if next_page_token:
             params["$skiptoken"] = next_page_token
         return params
