@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import sys
 import typing
+from datetime import timedelta
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
@@ -104,6 +105,7 @@ class ExactStream(RESTStream):
             params["$select"] = self.select
         start_date = self.get_starting_timestamp(context)
         if start_date is not None:
+            start_date -= timedelta(hours=1)
             date_filter = f"Modified gt datetime'{start_date.strftime('%Y-%m-%dT%H:%M:%S')}'"
             params["$filter"] = date_filter
         if next_page_token:
