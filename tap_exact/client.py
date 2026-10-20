@@ -124,9 +124,11 @@ class ExactStream(RESTStream):
             xml = etree.fromstring(response.content, parser=my_parser)
             cleaned_xml_string = etree.tostring(xml)
             # parse xml to dict
-            data = json.loads(json.dumps(xmltodict.parse(cleaned_xml_string)))
+            data = json.loads(json.dumps(xmltodict.parse(cleaned_xml_string, force_list=("entry",))))
         except:  # noqa: E722
-            data = json.loads(json.dumps(xmltodict.parse(response.content.decode("utf-8-sig").encode("utf-8"))))
+            data = json.loads(
+                json.dumps(xmltodict.parse(response.content.decode("utf-8-sig").encode("utf-8"), force_list=("entry",)))
+            )
         return data
 
     def parse_response(self, response: requests.Response) -> Iterable[dict]:
