@@ -13,7 +13,7 @@ import requests
 import xmltodict
 from lxml import etree
 from singer_sdk.helpers.jsonpath import extract_jsonpath
-from singer_sdk.pagination import BaseOffsetPaginator
+from singer_sdk.pagination import OffsetPaginator
 from singer_sdk.streams import RESTStream
 
 from tap_exact.auth import ExactAuthenticator
@@ -32,7 +32,7 @@ _Auth = Callable[[requests.PreparedRequest], requests.PreparedRequest]
 SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
 
-class ExactPaginator(BaseOffsetPaginator):
+class ExactPaginator(OffsetPaginator):
     """Exact pagination helper class."""
 
     def __init__(self, stream: ExactStream, start_value: int, page_size: int) -> None:  # noqa: D107
@@ -112,7 +112,7 @@ class ExactStream(RESTStream):
             params["$skiptoken"] = next_page_token
         return params
 
-    def get_new_paginator(self) -> BaseOffsetPaginator:
+    def get_new_paginator(self) -> OffsetPaginator:
         """Create a new pagination helper instance."""
         return ExactPaginator(self, start_value=None, page_size=60)
 
@@ -189,7 +189,7 @@ class ExactStream(RESTStream):
 class ExactBulkStream(ExactStream):
     """Exact bulk stream class."""
 
-    def get_new_paginator(self) -> BaseOffsetPaginator:
+    def get_new_paginator(self) -> OffsetPaginator:
         """Create a new pagination helper instance."""
         return ExactPaginator(self, start_value=None, page_size=1000)
 
