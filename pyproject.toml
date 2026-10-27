@@ -10,6 +10,13 @@ keywords = [
     "ELT",
     "Exact",
 ]
+classifiers = [
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
 dependencies = [
     "boto3>=1.43.118",
     "lxml>=6.1.3",
@@ -62,3 +69,23 @@ known-first-party = ["tap_exact"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.tox]
+requires = [
+    "tox>=4.53",
+    "tox-uv>=1.35",
+]
+env_list = [
+    { prefix = "3.", start = 10 },
+]
+
+[tool.tox.env_run_base]
+description = "run tests on Python {env_name}"
+runner = "uv-venv-lock-runner"
+pass_env = [
+    "CI",
+    "GITHUB_*",
+    "TAP_EXACT_*",
+]
+dependency_groups = [ "dev" ]
+commands = [ [ "pytest", { replace = "posargs", default = [ "tests" ], extend = true } ] ]
