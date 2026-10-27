@@ -1,5 +1,7 @@
 """Offline tests for parsing Exact Atom feeds."""
 
+from __future__ import annotations
+
 import requests
 
 from tap_exact.tap import TapExact
@@ -25,12 +27,15 @@ def _records(n: int) -> list[dict]:
 
 
 def test_single_entry() -> None:
+    """A feed with one entry yields one record."""
     assert _records(1) == [{"ID": "0", "Division": 3490573}]
 
 
 def test_multiple_entries() -> None:
+    """Entries are parsed in feed order."""
     assert [r["ID"] for r in _records(2)] == ["0", "1"]
 
 
 def test_no_entries() -> None:
+    """An empty feed yields no records."""
     assert _records(0) == []
